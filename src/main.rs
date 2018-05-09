@@ -19,6 +19,7 @@ fn main() {
     };
 
     let out_file_name = Path::new(&arg).with_extension("gif");
+    println!("Creating GIF for {}", arg);
 
     let mut file = match File::open(arg) {
         Ok(f) => f,
@@ -32,7 +33,7 @@ fn main() {
     let mut buff = Vec::new();
     file.read_to_end(&mut buff).expect("Could not read file");
 
-    let mut out_file = File::create(out_file_name).expect("Could not create output gif");
+    let mut out_file = File::create(&out_file_name).expect("Could not create output gif");
     let mut rand = rand::thread_rng();
     println!("{:?}", &buff[..10]);
     let format = image::guess_format(&buff).expect("Could not guess image format");
@@ -47,15 +48,24 @@ fn main() {
     add_frame(&buff, format, &mut encoder, &dimensions).expect("Could not write first frame");
 
     for i in 0..100 {
+        let mut fail_count = 0;
         loop {
             // corrupt a random pixel
             let index = rand.gen_range(0, buff.len());
-            buff[index] = 0;
+            let value = rand.gen_range(0, (std::u8::MAX as u16) + 1) as u8;
+            let old_value = buff[index];
+            buff[index] = value;
 
             if let Ok(()) = add_frame(&buff, format, &mut encoder, &dimensions) {
                 break;
             }
-            println!("Could not clear pixel at index {}", index);
+            buff[index] = old_value;
+            fail_count += 1;
+            if fail_count == 1_000_000 {
+                println!("Failed too many times, aborting");
+                std::fs::remove_file(&out_file_name).expect("Could not delete output gif");
+                return;
+            }
         }
         println!("{}%", i + 1);
     }
@@ -63,7 +73,10 @@ fn main() {
 
 // Create image from the in-memory buffer
 fn add_frame(buff: &[u8], format: image::ImageFormat, encoder: &mut gif::Encoder<&mut File>, dimensions: &(u16, u16)) -> Result<(), ()> {
-    let image = image::load_from_memory_with_format(&buff, format).map_err(|_| ())?;
+    let image = image::load_from_memory_with_format(&buff, format).map_err(|e|{
+        println!("{:?}", e);
+        ()
+    })?;
     let rgba_image = image.to_rgba();
     let mut raw = rgba_image.into_raw();
 
