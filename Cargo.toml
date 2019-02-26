@@ -1,9 +1,13 @@
 [package]
 name = "corrupted_gif"
 version = "0.1.0"
+edition = "2018"
 authors = ["Victor Koenders <victor.koenders@gmail.com>"]
 
 [dependencies]
 gif = "*"
 rand = "*"
 image = "*"
+rayon = "*"
+pbr = "*"
+
