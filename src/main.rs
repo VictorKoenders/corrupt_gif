@@ -1,7 +1,7 @@
+use corrupted_gif;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
-use corrupted_gif;
 
 fn main() {
     let arg = match std::env::args().nth(1) {
