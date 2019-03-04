@@ -4,10 +4,21 @@ version = "0.1.0"
 edition = "2018"
 authors = ["Victor Koenders <victor.koenders@gmail.com>"]
 
+[[bin]]
+name = "corrupt_gif"
+path = "src/main.rs"
+
+[[bin]]
+name = "bootstrap"
+path = "src/lambda.rs"
+
 [dependencies]
-gif = "*"
-rand = "*"
-image = "*"
-rayon = "*"
-pbr = "*"
+gif = "0.10"
+rand = "0.6"
+image = "0.21"
+pbr = "1.0"
+lambda_runtime = "0.2"
+serde_derive = "1.0"
+serde = "1.0"
+simple-error = "0.1"
 
